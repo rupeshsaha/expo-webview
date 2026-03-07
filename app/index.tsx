@@ -1,8 +1,16 @@
+import Constants from "expo-constants";
 import * as Network from "expo-network";
 import { Stack } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Alert, BackHandler, Linking, StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  Alert,
+  BackHandler,
+  Linking,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { WebView, WebViewNavigation } from "react-native-webview";
 
 // Components
@@ -107,7 +115,8 @@ export default function MainWebView() {
       setHasError(false);
       webViewRef.current.reload();
     }
-    setRefreshing(false);
+    // We stop refreshing after a small delay or once load starts
+    setTimeout(() => setRefreshing(false), 800);
   }, [checkConnection]);
 
   // 5. Retry Handler
@@ -121,62 +130,71 @@ export default function MainWebView() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
 
       {isOffline && <OfflineView onRetry={handleRetry} />}
       {!isOffline && hasError && <ErrorView onRetry={handleRetry} />}
 
       {!isOffline && (
-        <WebView
-          ref={webViewRef}
-          source={{
-            uri: WEBVIEW_CONFIG.URL,
-            headers: WEBVIEW_CONFIG.HEADERS,
-          }}
-          style={styles.webview}
-          onLoadStart={() => {
-            setIsLoading(true);
-            setProgress(0);
-            startLoadingTimer();
-          }}
-          onLoadEnd={() => {
-            setIsLoading(false);
-            if (loadingTimeout.current) clearTimeout(loadingTimeout.current);
-          }}
-          onLoadProgress={({ nativeEvent }) => {
-            const currentProgress = nativeEvent.progress;
-            setProgress(currentProgress);
-            // If more than 90% loaded, we can hide the spinner for better UX
-            if (currentProgress > 0.9) {
+        <ScrollView
+          contentContainerStyle={{ flex: 1 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              progressViewOffset={Constants.statusBarHeight} // Adjust offset for refresh spinner
+              colors={["#007AFF"]}
+            />
+          }
+        >
+          <WebView
+            ref={webViewRef}
+            source={{
+              uri: WEBVIEW_CONFIG.URL,
+              headers: WEBVIEW_CONFIG.HEADERS,
+            }}
+            style={styles.webview}
+            onLoadStart={() => {
+              setIsLoading(true);
+              setProgress(0);
+              startLoadingTimer();
+            }}
+            onLoadEnd={() => {
               setIsLoading(false);
-            }
-          }}
-          onNavigationStateChange={onNavigationStateChange}
-          onError={() => setHasError(true)}
-          onHttpError={(syntheticEvent) => {
-            if (syntheticEvent.nativeEvent.statusCode >= 400) {
-              setHasError(true);
-            }
-          }}
-          // Pull to Refresh Implementation
-          bounces={true}
-          allowsBackForwardNavigationGestures={true}
-          // Android Specific Optimizations
-          userAgent={WEBVIEW_CONFIG.USER_AGENT}
-          domStorageEnabled={true}
-          javaScriptEnabled={true}
-          scalesPageToFit={true}
-          setSupportMultipleWindows={false}
-          // Security
-          originWhitelist={["https://*", "mailto:*", "tel:*"]}
-          mixedContentMode="never"
-          allowFileAccess={false}
-        />
+              if (loadingTimeout.current) clearTimeout(loadingTimeout.current);
+            }}
+            onLoadProgress={({ nativeEvent }) => {
+              const currentProgress = nativeEvent.progress;
+              setProgress(currentProgress);
+              // If more than 90% loaded, we can hide the spinner for better UX
+              if (currentProgress > 0.9) {
+                setIsLoading(false);
+              }
+            }}
+            onNavigationStateChange={onNavigationStateChange}
+            onError={() => setHasError(true)}
+            onHttpError={(syntheticEvent) => {
+              if (syntheticEvent.nativeEvent.statusCode >= 400) {
+                setHasError(true);
+              }
+            }}
+            // Core config
+            domStorageEnabled={true}
+            javaScriptEnabled={true}
+            scalesPageToFit={true}
+            setSupportMultipleWindows={false}
+            userAgent={WEBVIEW_CONFIG.USER_AGENT}
+            // Security
+            originWhitelist={["https://*", "mailto:*", "tel:*"]}
+            mixedContentMode="never"
+            allowFileAccess={false}
+          />
+        </ScrollView>
       )}
 
       {isLoading && !isOffline && !hasError && <LoadingView />}
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -184,6 +202,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+    paddingTop: Constants.statusBarHeight,
   },
   webview: {
     flex: 1,
