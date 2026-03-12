@@ -1,28 +1,21 @@
 {
   "expo": {
-    "name": "bazm-e-haideri_admin",
+    "name": "Bazm-e-Haideri Admin",
     "slug": "bazm-e-haideri_admin",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "bazmehaideriadmin",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "package": "com.bazmehaideri.admin",
       "versionCode": 1,
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png"
-      },
+      "icon": "./assets/images/icon.png",
       "permissions": ["INTERNET", "ACCESS_NETWORK_STATE"],
-      "softwareKeyboardLayoutMode": "adjustResize",
-      "edgeToEdgeEnabled": true,
-      "cacheEnabled": true,
-      "domStorageEnabled": true
+      "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
       "output": "static",

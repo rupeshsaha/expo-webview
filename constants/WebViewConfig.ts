@@ -4,7 +4,7 @@ import { Platform } from "react-native";
 
 export const WEBVIEW_CONFIG = {
   // Replace with your production domain
-  URL: "https://ngowallet.tymiqly.com",
+  URL: "https://cutloon.com",
 
   // Custom User Agent to satisfy Play Store requirements and identify the app
   USER_AGENT: `${Application.applicationName}/${Application.nativeApplicationVersion} (Android WebView Wrapper; ${Platform.OS} ${Platform.Version}; ${Device.modelName})`,
