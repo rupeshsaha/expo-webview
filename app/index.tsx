@@ -248,8 +248,8 @@ export default function MainWebView() {
           if (loadingTimeout.current) clearTimeout(loadingTimeout.current);
         }
       }}
-      onScroll={handleWebViewScroll}
-      scrollEventThrottle={16}
+      // onScroll={handleWebViewScroll}
+      // scrollEventThrottle={16}
       // Core config
       domStorageEnabled={true}
       javaScriptEnabled={true}
@@ -278,15 +278,15 @@ export default function MainWebView() {
           <ScrollView
             contentContainerStyle={{ flex: 1 }}
             nestedScrollEnabled
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                enabled={webViewAtTop}
-                onRefresh={onRefresh}
-                progressViewOffset={Constants.statusBarHeight}
-                colors={["#007AFF"]}
-              />
-            }
+            // refreshControl={
+            //   <RefreshControl
+            //     refreshing={refreshing}
+            //     enabled={webViewAtTop}
+            //     onRefresh={onRefresh}
+            //     progressViewOffset={Constants.statusBarHeight}
+            //     colors={["#007AFF"]}
+            //   />
+            // }
           >
             {webViewElement}
           </ScrollView>
@@ -295,7 +295,7 @@ export default function MainWebView() {
         )
       )}
 
-      {isLoading && !isOffline && !hasError && <LoadingView />}
+      {/* {isLoading && !isOffline && !hasError && <LoadingView />} */}
     </View>
   );
 }
