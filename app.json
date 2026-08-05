@@ -8,14 +8,21 @@
     "scheme": "biharshop",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.comestro.biharshop"
     },
     "android": {
       "package": "com.comestro.biharshop",
       "versionCode": 1,
       "icon": "./assets/images/icon.png",
       "backgroundColor": "#ffffff",
-      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE", "CAMERA", "ACCESS_FINE_LOCATION","ACCESS_COARSE_LOCATION"],
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
       "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
