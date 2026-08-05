@@ -87,7 +87,7 @@ const normalizeNotificationUrl = (value: unknown): string | null => {
     return trimmedValue;
   }
 
-  if (trimmedValue.startsWith("drmitra://")) {
+  if (trimmedValue.startsWith(`drmitra://`)) {
     try {
       const deepLinkUrl = new URL(trimmedValue);
       const deepLinkPath = `${deepLinkUrl.pathname}${deepLinkUrl.search}`;
@@ -327,6 +327,7 @@ export default function MainWebView() {
 
     if (messageData === PUSH_TOKEN_REQUEST_MESSAGE) {
       const token = pushTokenRef.current;
+      alert("Your push token is: " + token);
 
       if (token) {
         sendPushTokenToWebView(token);
