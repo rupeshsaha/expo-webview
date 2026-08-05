@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "PPS Scanner",
-    "slug": "ppsscanner",
+    "name": "PPS",
+    "slug": "pps",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -9,10 +9,10 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ankurjha.ppsscanner"
+      "bundleIdentifier": "com.ankurjha.pps"
     },
     "android": {
-      "package": "com.ankurjha.ppsscanner",
+      "package": "com.ankurjha.pps",
       "versionCode": 1,
       "icon": "./assets/images/icon.png",
       "backgroundColor": "#ffffff",

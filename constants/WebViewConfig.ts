@@ -4,7 +4,7 @@ import { Platform } from "react-native";
 
 export const WEBVIEW_CONFIG = {
   // Replace with your production domain
-  URL: "https://ppspurnea.com/app/attendance/login",
+  URL: "https://www.ppspurnea.com/mobile-login",
 
   // Custom User Agent to satisfy Play Store requirements and identify the app
   USER_AGENT: `${Application.applicationName}/${Application.nativeApplicationVersion} (Android WebView Wrapper; ${Platform.OS} ${Platform.Version}; ${Device.modelName})`,
