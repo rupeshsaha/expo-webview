@@ -15,7 +15,13 @@
       "versionCode": 1,
       "icon": "./assets/images/icon.png",
       "backgroundColor": "#ffffff",
-      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE", "CAMERA", "ACCESS_FINE_LOCATION","ACCESS_COARSE_LOCATION"],
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
       "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
@@ -44,8 +50,9 @@
       "reactCompiler": true
     },
     "extra": {
+      "router": {},
       "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
+        "projectId": "9df28d46-5a06-44a0-9add-82ef232c0626"
       }
     }
   }
