@@ -1,5 +1,6 @@
 import Constants from "expo-constants";
 import * as Network from "expo-network";
+import * as Notifications from "expo-notifications";
 import { Stack } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -14,6 +15,7 @@ import {
 } from "react-native";
 import type {
   ShouldStartLoadRequest,
+  WebViewMessageEvent,
   WebViewNavigation,
   WebViewScrollEvent,
 } from "react-native-webview/lib/WebViewTypes";
@@ -27,6 +29,111 @@ import OfflineView from "@/components/webview/OfflineView";
 // Constants
 import { WEBVIEW_CONFIG } from "@/constants/WebViewConfig";
 
+// Lib
+import {
+  buildPushTokenInjectionScript,
+  registerForPushNotificationsAsync,
+} from "@/lib/notifications";
+
+
+const appName = Constants.expoConfig?.name;
+const appVersion = Constants.expoConfig?.version;
+
+console.log(`Welcome to ${appName} v${appVersion}`);
+
+
+const PUSH_TOKEN_REQUEST_MESSAGE = `${appName?.toUpperCase().replace(" ","_")}_REQUEST_PUSH_TOKEN`;
+const DRMITRA_WEB_BASE_URL = WEBVIEW_CONFIG.URL;
+
+const parseNotificationData = (
+  data: unknown,
+): Record<string, unknown> | null => {
+  if (!data) {
+    return null;
+  }
+
+  if (typeof data === "string") {
+    try {
+      const parsed = JSON.parse(data) as unknown;
+      if (parsed && typeof parsed === "object") {
+        return parsed as Record<string, unknown>;
+      }
+    } catch {
+      return { link: data };
+    }
+  }
+
+  if (typeof data === "object") {
+    return data as Record<string, unknown>;
+  }
+
+  return null;
+};
+
+const normalizeNotificationUrl = (value: unknown): string | null => {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmedValue = value.trim();
+  if (!trimmedValue) {
+    return null;
+  }
+
+  if (
+    trimmedValue.startsWith("http://") ||
+    trimmedValue.startsWith("https://")
+  ) {
+    return trimmedValue;
+  }
+
+  if (trimmedValue.startsWith("drmitra://")) {
+    try {
+      const deepLinkUrl = new URL(trimmedValue);
+      const deepLinkPath = `${deepLinkUrl.pathname}${deepLinkUrl.search}`;
+
+      return `${DRMITRA_WEB_BASE_URL}${deepLinkPath.startsWith("/") ? deepLinkPath : `/${deepLinkPath}`}`;
+    } catch {
+      return null;
+    }
+  }
+
+  if (trimmedValue.startsWith("/")) {
+    return `${DRMITRA_WEB_BASE_URL}${trimmedValue}`;
+  }
+
+  return `${DRMITRA_WEB_BASE_URL}/${trimmedValue}`;
+};
+
+const getNotificationTargetUrl = (data: unknown): string | null => {
+  const payload = parseNotificationData(data);
+
+  if (!payload) {
+    return null;
+  }
+
+  return (
+    normalizeNotificationUrl(payload.url) ??
+    normalizeNotificationUrl(payload.link) ??
+    normalizeNotificationUrl(payload.deepLink) ??
+    normalizeNotificationUrl(payload.path) ??
+    normalizeNotificationUrl(payload.route) ??
+    normalizeNotificationUrl(payload.screen)
+  );
+};
+
+const normalizeComparableUrl = (value: string): string => {
+  try {
+    const parsed = new URL(value);
+    const normalizedPath = parsed.pathname.replace(/\/+$/, "") || "/";
+    const normalizedSearch = parsed.search || "";
+
+    return `${parsed.origin}${normalizedPath}${normalizedSearch}`;
+  } catch {
+    return value.trim().replace(/\/+$/, "");
+  }
+};
+
 export default function MainWebView() {
   const [isLoading, setIsLoading] = useState(true);
   const [isOffline, setIsOffline] = useState(false);
@@ -38,6 +145,10 @@ export default function MainWebView() {
   const webViewRef = useRef<WebView>(null);
   const loadingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const webViewAtTopRef = useRef(true);
+  const pushTokenRef = useRef<string | null>(null);
+  const isWebViewReadyRef = useRef(false);
+  const pendingNotificationUrlRef = useRef<string | null>(null);
+  const activeNotificationTargetRef = useRef<string | null>(null);
 
   // 1. Network Detection
   const checkConnection = useCallback(async () => {
@@ -105,12 +216,121 @@ export default function MainWebView() {
     return () => backHandler.remove();
   }, [canGoBack]);
 
+  // 2.1 Push Notifications
+  const sendPushTokenToWebView = (token: string) => {
+    webViewRef.current?.injectJavaScript(
+      buildPushTokenInjectionScript(token),
+    );
+  };
+
+  const navigateWebViewToUrl = (targetUrl: string) => {
+    webViewRef.current?.injectJavaScript(
+      `window.location.replace(${JSON.stringify(targetUrl)}); true;`,
+    );
+  };
+
+  useEffect(() => {
+    let isActive = true;
+
+    const bootstrapPushNotifications = async () => {
+      const token = await registerForPushNotificationsAsync();
+
+      if (!isActive) {
+        return;
+      }
+
+      pushTokenRef.current = token;
+
+      if (token) {
+        sendPushTokenToWebView(token);
+      }
+    };
+
+    void bootstrapPushNotifications();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const subscription = Notifications.addPushTokenListener((token) => {
+      pushTokenRef.current = token.data;
+      sendPushTokenToWebView(token.data);
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleNotificationResponse = (
+      response: Notifications.NotificationResponse,
+    ) => {
+      const targetUrl = getNotificationTargetUrl(
+        response.notification.request.content.data,
+      );
+
+      if (!targetUrl) {
+        return;
+      }
+
+      activeNotificationTargetRef.current = targetUrl;
+      pendingNotificationUrlRef.current = targetUrl;
+
+      if (isWebViewReadyRef.current) {
+        navigateWebViewToUrl(targetUrl);
+      }
+    };
+
+    void Notifications.getLastNotificationResponseAsync().then((response) => {
+      if (response) {
+        handleNotificationResponse(response);
+      }
+    });
+
+    const responseSubscription =
+      Notifications.addNotificationResponseReceivedListener(
+        handleNotificationResponse,
+      );
+
+    return () => {
+      responseSubscription.remove();
+    };
+  }, []);
+
   // 3. Navigation State Change
   const onNavigationStateChange = (navState: WebViewNavigation) => {
     setCanGoBack(navState.canGoBack);
     if (!navState.loading) {
       setIsLoading(false);
       if (loadingTimeout.current) clearTimeout(loadingTimeout.current);
+    }
+
+    const targetUrl = activeNotificationTargetRef.current;
+    if (!targetUrl) {
+      return;
+    }
+
+    const currentUrl = normalizeComparableUrl(navState.url);
+    const normalizedTarget = normalizeComparableUrl(targetUrl);
+
+    if (currentUrl === normalizedTarget) {
+      activeNotificationTargetRef.current = null;
+      pendingNotificationUrlRef.current = null;
+    }
+  };
+
+  const handleWebViewMessage = (event: WebViewMessageEvent) => {
+    const messageData = event.nativeEvent.data;
+
+    if (messageData === PUSH_TOKEN_REQUEST_MESSAGE) {
+      const token = pushTokenRef.current;
+
+      if (token) {
+        sendPushTokenToWebView(token);
+      }
     }
   };
 
@@ -231,8 +451,19 @@ export default function MainWebView() {
         setIsLoading(false);
         setRefreshing(false);
         if (loadingTimeout.current) clearTimeout(loadingTimeout.current);
+
+        isWebViewReadyRef.current = true;
+
+        if (pushTokenRef.current) {
+          sendPushTokenToWebView(pushTokenRef.current);
+        }
+
+        if (pendingNotificationUrlRef.current) {
+          navigateWebViewToUrl(pendingNotificationUrlRef.current);
+        }
       }}
       onNavigationStateChange={onNavigationStateChange}
+      onMessage={handleWebViewMessage}
       onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
       onError={() => {
         setHasError(true);
