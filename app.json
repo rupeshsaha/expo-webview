@@ -1,20 +1,21 @@
 {
   "expo": {
-    "name": "Bazm-e-Haideri Admin",
-    "slug": "bazm-e-haideri_admin",
+    "name": "Dr Mitra",
+    "slug": "drmitra",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "bazmehaideriadmin",
+    "scheme": "drmitra",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true
     },
     "android": {
-      "package": "com.bazmehaideri.admin",
+      "package": "com.crmstech.drmitra",
       "versionCode": 1,
       "icon": "./assets/images/icon.png",
-      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE"],
+      "backgroundColor": "#ffffff",
+      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE", "CAMERA", "ACCESS_FINE_LOCATION","ACCESS_COARSE_LOCATION"],
       "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
