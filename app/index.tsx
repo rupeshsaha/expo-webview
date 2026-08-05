@@ -12,6 +12,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type {
   ShouldStartLoadRequest,
   WebViewNavigation,
@@ -34,6 +35,8 @@ export default function MainWebView() {
   const [canGoBack, setCanGoBack] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [webViewAtTop, setWebViewAtTop] = useState(true);
+
+  const insets = useSafeAreaInsets();
 
   const webViewRef = useRef<WebView>(null);
   const loadingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -267,7 +270,7 @@ export default function MainWebView() {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <Stack.Screen options={{ headerShown: false }} />
 
       {isOffline && <OfflineView onRetry={handleRetry} />}
@@ -304,7 +307,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    paddingTop: Constants.statusBarHeight,
   },
   webview: {
     flex: 1,

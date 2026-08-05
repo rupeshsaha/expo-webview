@@ -1,18 +1,18 @@
 {
   "expo": {
-    "name": "Biharshop",
-    "slug": "biharshop",
+    "name": "PPS Scanner",
+    "slug": "ppsscanner",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "biharshop",
+    "scheme": "ppsscanner",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.comestro.biharshop"
+      "bundleIdentifier": "com.ankurjha.ppsscanner"
     },
     "android": {
-      "package": "com.comestro.biharshop",
+      "package": "com.ankurjha.ppsscanner",
       "versionCode": 1,
       "icon": "./assets/images/icon.png",
       "backgroundColor": "#ffffff",
