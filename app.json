@@ -1,17 +1,17 @@
 {
   "expo": {
-    "name": "Dr Mitra",
-    "slug": "drmitra",
+    "name": "Biharshop",
+    "slug": "biharshop",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "drmitra",
+    "scheme": "biharshop",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true
     },
     "android": {
-      "package": "com.crmstech.drmitra",
+      "package": "com.comestro.biharshop",
       "versionCode": 1,
       "icon": "./assets/images/icon.png",
       "backgroundColor": "#ffffff",
