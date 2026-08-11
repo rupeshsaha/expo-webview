@@ -1,18 +1,18 @@
 {
   "expo": {
-    "name": "Biharshop",
-    "slug": "biharshop",
+    "name": "CRMSTECH",
+    "slug": "crmstech",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "biharshop",
+    "scheme": "crmstech",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.comestro.biharshop"
+      "bundleIdentifier": "com.crmstech.crmstechapp"
     },
     "android": {
-      "package": "com.comestro.biharshop",
+      "package": "com.crmstech.crmstechapp",
       "versionCode": 1,
       "icon": "./assets/images/icon.png",
       "backgroundColor": "#ffffff",
